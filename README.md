@@ -49,6 +49,3 @@ B4 : Quelle ligne de commande vous faut-il avec pyinstaller pour créer le binai
 
 pyinstaller --onefile --noconsole --icon=icon.ico --name=SecretManager.exe SecretManager.py.
 
-B5 : Où se trouve le binaire créer ?
-
-Le binaire se trouve dans le dossier dist qui se trouve dans le dossier SecretManager.
